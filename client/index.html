@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spending Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spending Tracker</h1>
+            <nav>
+                <button id="add-expense-btn" class="nav-btn active">Add Expense</button>
+                <button id="cc-payments-btn" class="nav-btn">Credit Card Payments</button>
+                <button id="view-all-btn" class="nav-btn">View All</button>
+                <button id="payment-methods-btn" class="nav-btn">Payment Methods</button>
+                <button id="reports-btn" class="nav-btn">Reports</button>
+                <button id="exit-btn" class="nav-btn exit-btn">Exit</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Add Expense Form with Split Screen -->
+            <section id="add-expense" class="section active">
+                <div class="split-container">
+                    <!-- Left Side: Form -->
+                    <div class="split-left">
+                        <h2>Add New Expense</h2>
+                        
+                        <!-- Duplicate Expenses Section -->
+                        <div class="duplicate-section">
+                            <h3>Duplicate from Previous Month</h3>
+                            <div class="duplicate-controls">
+                                <select id="duplicate-year">
+                                    <option value="">Select Year</option>
+                                </select>
+                                <select id="duplicate-month">
+                                    <option value="">Select Month</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <button type="button" id="duplicate-expenses-btn">Duplicate Expenses</button>
+                            </div>
+                        </div>
+
+                        <form id="expense-form">
+                            <div class="form-group">
+                                <label for="date">Date:</label>
+                                <input type="date" id="date" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="expense-type">Expense Type:</label>
+                                <div class="combo-input">
+                                    <input type="text" id="expense-type" list="expense-type-options" required placeholder="Select or enter expense type">
+                                    <datalist id="expense-type-options">
+                                    </datalist>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="expense">Expense:</label>
+                                <div class="combo-input">
+                                    <input type="text" id="expense" list="expense-options" required placeholder="Select or enter expense name">
+                                    <datalist id="expense-options">
+                                    </datalist>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="payment-method">Payment Method:</label>
+                                <select id="payment-method" required>
+                                    <option value="">Select payment method</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <input type="text" id="description" placeholder="Optional description">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="amount">Amount ($):</label>
+                                <input type="number" id="amount" step="0.01" min="0" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="notes">Notes:</label>
+                                <textarea id="notes" placeholder="Optional notes"></textarea>
+                            </div>
+                            
+                            <div class="form-buttons">
+                                <button type="submit" id="expense-submit-btn">Add Expense</button>
+                                <button type="button" id="clear-form-btn">Clear Form</button>
+                                <button type="button" id="cancel-edit-btn" style="display: none;">Cancel Edit</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right Side: Recent Expenses -->
+                    <div class="split-right">
+                        <h2>Recent Expenses</h2>
+                        <div class="recent-filters">
+                            <select id="recent-filter-month">
+                                <option value="">This Month</option>
+                                <option value="all">All Time</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <button id="refresh-recent">Refresh</button>
+                        </div>
+                        <div id="recent-expenses-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Credit Card Payments -->
+            <section id="cc-payments" class="section">
+                <div class="split-container">
+                    <!-- Left Side: Payment Form -->
+                    <div class="split-left">
+                        <h2>Add Credit Card Payment</h2>
+                        
+                        <!-- Duplicate CC Payments Section -->
+                        <div class="duplicate-section">
+                            <h3>Duplicate from Previous Month</h3>
+                            <div class="duplicate-controls">
+                                <select id="duplicate-cc-year">
+                                    <option value="">Select Year</option>
+                                </select>
+                                <select id="duplicate-cc-month">
+                                    <option value="">Select Month</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <button type="button" id="duplicate-cc-btn">Duplicate Payments</button>
+                            </div>
+                        </div>
+
+                        <form id="cc-payment-form">
+                            <div class="form-group">
+                                <label for="cc-date">Date:</label>
+                                <input type="date" id="cc-date" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cc-name">Credit Card:</label>
+                                <select id="cc-name" required>
+                                    <option value="">Select credit card</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cc-amount">Payment Amount ($):</label>
+                                <input type="number" id="cc-amount" step="0.01" min="0" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cc-notes">Notes:</label>
+                                <textarea id="cc-notes" placeholder="Optional notes"></textarea>
+                            </div>
+                            
+                            <div class="form-buttons">
+                                <button type="submit" id="cc-submit-btn">Add Payment</button>
+                                <button type="button" id="clear-cc-form-btn">Clear Form</button>
+                                <button type="button" id="cancel-cc-edit-btn" style="display: none;">Cancel Edit</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right Side: Recent Payments -->
+                    <div class="split-right">
+                        <h2>Recent Payments</h2>
+                        <div class="recent-filters">
+                            <select id="cc-filter-month">
+                                <option value="">This Month</option>
+                                <option value="all">All Time</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <button id="refresh-cc-recent">Refresh</button>
+                        </div>
+                        <div id="cc-recent-payments-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View All -->
+            <section id="view-all" class="section">
+                <!-- Expenses Section -->
+                <div class="view-section">
+                    <h2>Expenses</h2>
+                    <div class="filters">
+                        <select id="filter-year">
+                            <option value="">All Years</option>
+                        </select>
+                        <select id="filter-month">
+                            <option value="">All Months</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select id="filter-expense-type">
+                            <option value="">All Expense Types</option>
+                        </select>
+                        <select id="filter-expense">
+                            <option value="">All Expenses</option>
+                        </select>
+                        <select id="filter-payment-method">
+                            <option value="">All Payment Methods</option>
+                        </select>
+                        <button id="apply-filters">Apply Filters</button>
+                    </div>
+                    <div id="expenses-list"></div>
+                </div>
+
+                <!-- Credit Card Payments Section -->
+                <div class="view-section">
+                    <h2>Credit Card Payments</h2>
+                    <div class="filters">
+                        <select id="cc-filter-year">
+                            <option value="">All Years</option>
+                        </select>
+                        <select id="cc-filter-month-view">
+                            <option value="">All Months</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select id="cc-filter-card">
+                            <option value="">All Credit Cards</option>
+                        </select>
+                        <button id="apply-cc-filters">Apply Filters</button>
+                    </div>
+                    <div id="cc-payments-list"></div>
+                </div>
+            </section>
+
+            <!-- Payment Methods Management -->
+            <section id="payment-methods" class="section">
+                <h2>Payment Methods Management</h2>
+                
+                <!-- Add New Payment Method Form -->
+                <div class="payment-method-form-section">
+                    <h3>Add New Payment Method</h3>
+                    <form id="payment-method-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pm-name">Payment Method Name:</label>
+                                <input type="text" id="pm-name" required placeholder="e.g., Credit Card 4, Chase Checking">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pm-type">Type:</label>
+                                <select id="pm-type" required>
+                                    <option value="">Select type</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="bank_account">Bank Account</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" id="pm-submit-btn">Add Payment Method</button>
+                                <button type="button" id="pm-cancel-btn" style="display: none;">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Payment Methods List -->
+                <div class="payment-methods-list-section">
+                    <h3>Existing Payment Methods</h3>
+                    <div id="payment-methods-list"></div>
+                </div>
+            </section>
+
+            <!-- Reports -->
+            <section id="reports" class="section">
+                <h2>Reports</h2>
+                <div class="report-controls">
+                    <select id="report-year">
+                        <option value="">Select Year</option>
+                    </select>
+                    <select id="report-month">
+                        <option value="">Yearly Report</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <button id="generate-report">Generate Report</button>
+                    <button id="export-excel">Export to Excel</button>
+                </div>
+                <div id="report-content"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
