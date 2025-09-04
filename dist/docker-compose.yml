@@ -1,0 +1,26 @@
+services:
+  spending-tracker:
+    build: .
+    container_name: spending-tracker
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - NAS_MODE=true
+      - DOCKER_MODE=true
+      - HOST=0.0.0.0
+      - PORT=3001
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.qnap.qcenter.type=external"
+      - "com.qnap.qcenter.category=productivity"
+      - "description=Personal Spending Tracker - Manage your expenses with credit card payment tracking"

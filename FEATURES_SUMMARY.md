@@ -2,12 +2,13 @@
 
 ## 🏗️ Application Structure
 
-### Five Main Tabs
+### Six Main Tabs
 1. **Add Expense** - Primary data entry with split-screen feedback
 2. **Credit Card Payments** - Dedicated credit card payment tracking
 3. **View All** - Combined view of all expenses and payments
 4. **Payment Methods** - Centralized payment method management
-5. **Reports** - Monthly and yearly analysis with "Others" calculation
+5. **Reports** - Monthly and yearly analysis with "Untracked Expenses" calculation
+6. **Database** - Data backup, import, and management operations
 
 ## 💡 Core Concepts
 
@@ -18,11 +19,11 @@ Expense Type (e.g., "Utilities")
         └── Payment Method (e.g., "Credit Card 1")
 ```
 
-### "Others" Calculation
+### "Untracked Expenses" Calculation
 ```
 Credit Card Payment: $500
 - Tracked Expenses: $350
-= Others: $150 (automatically calculated)
+= Untracked Expenses: $150 (automatically calculated)
 ```
 
 ## ⚡ Key Features
@@ -37,16 +38,19 @@ Credit Card Payment: $500
 - **One-Click Setup**: Duplicate entire previous month in seconds
 - **Smart Defaults**: Auto-selects previous month (handles year rollover)
 - **Bulk Processing**: Copies all expenses/payments with today's date
-- **Edit After**: Click any duplicated item to adjust amounts
+- **Auto-refresh**: Lists update immediately after duplication
+- **Toast Notifications**: No clicking "OK" - auto-dismissing success messages
 
 ### ✏️ Edit/Delete Management
 - **Visual Edit Mode**: Form title and buttons change when editing
 - **Click to Edit**: Click anywhere on an item in lists to edit
 - **Action Buttons**: Edit (✏️) and Delete (🗑️) buttons on each item
 - **Safety Checks**: Confirmation dialogs and usage validation
+- **Auto-refresh**: Lists update immediately after deletion
+- **Smart Notifications**: Color-coded toast messages (green/red/orange/blue)
 
 ### 📊 Advanced Reporting
-- **Monthly Reports**: Complete spending breakdown by expense type with "Others" calculation
+- **Monthly Reports**: Complete spending breakdown by expense type with "Untracked Expenses" calculation
 - **Yearly Summaries**: Annual spending patterns and trends
 - **Excel Export**: Professional .xlsx files with multiple sheets and proper formatting
 - **Multiple Filters**: Filter by date, type, expense, payment method
@@ -56,6 +60,12 @@ Credit Card Payment: $500
 - **Type Specification**: Mark as Credit Card or Bank Account
 - **Usage Protection**: Cannot delete payment methods used in expenses
 - **Clean Interface**: Add, edit, delete with visual feedback
+
+### 💾 Database Management
+- **Backup Database**: Download timestamped backup files for safe storage
+- **Import Database**: Merge data from previous backups without losing current data
+- **Clear Database**: Complete data reset with double confirmation protection
+- **File Safety**: Validates database files before import operations
 
 ## 🎨 User Interface
 
@@ -108,9 +118,29 @@ Credit Card Payment: $500
 
 ### Analysis & Reporting
 1. **View All**: See complete picture of expenses and payments
-2. **Generate Reports**: Monthly summaries with automatic "Others" calculation
+2. **Generate Reports**: Monthly summaries with automatic "Untracked Expenses" calculation
 3. **Export to Excel**: Download professional .xlsx files with multiple sheets
 4. **Filter Data**: Use multiple criteria to analyze spending patterns
+
+## 🌐 Network & Deployment
+
+### Multi-Platform Support
+- **Windows Executable**: `spending-tracker-win.exe` for desktop use
+- **Linux Executable**: `spending-tracker-linux` for NAS deployment
+- **Docker Container**: Containerized deployment for QNAP Container Station
+- **Source Code**: Direct Node.js deployment on any platform
+
+### Network Access
+- **Home Network Sharing**: Access from any device on your network
+- **Mobile Responsive**: Full functionality on phones and tablets
+- **Real-time Updates**: Auto-refresh across all connected devices
+- **Dynamic API**: Automatically adapts to your network configuration
+
+### NAS Integration
+- **QNAP Container Station**: One-command Docker deployment
+- **Data Persistence**: Database stored in persistent volumes
+- **Health Monitoring**: Built-in container health checks
+- **Easy Management**: Start/stop/restart from Container Station GUI
 
 ## 🛡️ Security & Safety
 

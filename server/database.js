@@ -1,12 +1,22 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-// For executable: use current working directory, for development: use server directory
-const dbPath = process.pkg 
-  ? path.join(process.cwd(), 'spending.db')  // When running as executable
-  : path.join(__dirname, 'spending.db');     // When running from source
+// For executable: use current working directory, for development: use server directory, for container: use data volume
+const dbPath = process.env.DOCKER_MODE || process.env.NAS_MODE 
+  ? path.join(process.cwd(), 'data', 'spending.db')  // When running in container/NAS mode
+  : process.pkg 
+    ? path.join(process.cwd(), 'spending.db')  // When running as executable
+    : path.join(__dirname, 'spending.db');     // When running from source
 
 console.log('Database path:', dbPath);
+
+// Ensure data directory exists
+const dataDir = path.dirname(dbPath);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  console.log('Created data directory:', dataDir);
+}
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -123,3 +133,4 @@ db.serialize(() => {
 });
 
 module.exports = db;
+module.exports.dbPath = dbPath;

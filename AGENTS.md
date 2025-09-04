@@ -3,17 +3,21 @@
 ## Commands
 - **Start dev**: `npm run dev` (runs both server and client)
 - **Server only**: `npm run server` (uses nodemon)
-- **Client only**: `npm run client` 
+- **Network mode**: `npm run nas` (for NAS deployment)
 - **Build client**: `npm run build`
-- **Package executable**: `npm run package` or `npm run package-win`
+- **Package executables**: `npm run package-win`, `npm run package-linux`, `npm run package-mac`
+- **Docker**: `npm run docker:compose`, `npm run docker:logs`, `npm run docker:stop`
 - **Install all deps**: `npm install-all`
 
 ## Architecture
 - **Full-stack Node.js app**: Express server + vanilla HTML/CSS/JS frontend
 - **Database**: SQLite (`server/spending.db`) with tables: expenses, expense_types, categories, payment_methods, credit_cards, credit_card_payments
-- **API**: REST endpoints at `/api/*` (expenses, payments, reports, Excel export)
+- **API**: REST endpoints at `/api/*` (expenses, payments, reports, Excel export, database management)
 - **Client-server**: Frontend at `client/`, served statically by Express
-- **Port**: Server runs on 3001, client accesses via localhost:3001
+- **Port**: Server runs on 3001, client accesses via localhost:3001 or network IP
+- **Six tabs**: Add Expense, Credit Card Payments, View All, Payment Methods, Reports, Database
+- **Network support**: Dynamic API URLs work for both localhost and network access
+- **Docker ready**: Containerized deployment for NAS systems
 
 ## Code Style
 - **Variables**: camelCase (`expenseTypes`, `paymentMethods`)

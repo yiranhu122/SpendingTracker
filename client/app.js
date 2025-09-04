@@ -1,4 +1,9 @@
-const API_BASE = 'http://localhost:3001/api';
+// Dynamic API base URL - works for both localhost and network access
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/api`;
+
+// Debug logging for container deployment
+console.log('API_BASE URL:', API_BASE);
+console.log('Current location:', window.location.href);
 
 let expenseTypes = [];
 let expenseNames = []; // Changed from categories to expenseNames
@@ -12,12 +17,7 @@ let editingPaymentMethod = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadExpenseTypes();
-    await loadExpenseNames();
-    await loadPaymentMethods();
-    await loadCreditCards();
-    await loadExpenses();
-    await loadCreditCardPayments();
+    // Setup event listeners first so navigation always works
     setupEventListeners();
     populateYearSelectors();
     
@@ -25,8 +25,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('date').valueAsDate = new Date();
     document.getElementById('cc-date').valueAsDate = new Date();
     
-    // Load recent expenses for split screen
-    await loadRecentExpenses();
+    // Load data with error handling
+    try {
+        await loadExpenseTypes();
+        await loadExpenseNames();
+        await loadPaymentMethods();
+        await loadCreditCards();
+        await loadExpenses();
+        await loadCreditCardPayments();
+        await loadRecentExpenses();
+    } catch (error) {
+        console.error('Error loading initial data:', error);
+        showNotification('Warning: Some data failed to load. Navigation still works.', 'warning', 3000);
+    }
 });
 
 // Event listeners
@@ -37,6 +48,7 @@ function setupEventListeners() {
     document.getElementById('view-all-btn').addEventListener('click', () => showSection('view-all'));
     document.getElementById('payment-methods-btn').addEventListener('click', () => showSection('payment-methods'));
     document.getElementById('reports-btn').addEventListener('click', () => showSection('reports'));
+    document.getElementById('database-btn').addEventListener('click', () => showSection('database'));
     document.getElementById('exit-btn').addEventListener('click', handleExit);
     
     // Forms
@@ -58,6 +70,12 @@ function setupEventListeners() {
     document.getElementById('duplicate-cc-btn').addEventListener('click', duplicateCCPayments);
     document.getElementById('payment-method-form').addEventListener('submit', handlePaymentMethodSubmit);
     document.getElementById('pm-cancel-btn').addEventListener('click', cancelPaymentMethodEdit);
+    
+    // Database management
+    document.getElementById('backup-db-btn').addEventListener('click', backupDatabase);
+    document.getElementById('import-file').addEventListener('change', handleFileSelect);
+    document.getElementById('import-db-btn').addEventListener('click', importDatabase);
+    document.getElementById('clear-db-btn').addEventListener('click', clearDatabase);
 }
 
 // Navigation
@@ -87,8 +105,15 @@ function showSection(sectionId) {
 // Load expense types from API
 async function loadExpenseTypes() {
     try {
+        console.log('Loading expense types from:', `${API_BASE}/expense-types`);
         const response = await fetch(`${API_BASE}/expense-types`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         expenseTypes = await response.json();
+        console.log('Loaded expense types:', expenseTypes.length);
         populateExpenseTypeSelectors();
     } catch (error) {
         console.error('Error loading expense types:', error);
@@ -342,14 +367,14 @@ async function handleExpenseSubmit(e) {
             // Update recent expenses list on the split screen
             await loadRecentExpenses();
             
-            alert(wasEditing ? 'Expense updated!' : 'Expense added!');
+            showNotification(wasEditing ? 'Expense updated!' : 'Expense added!');
         } else {
             const error = await response.json();
-            alert('Error: ' + error.error);
+            showNotification('Error: ' + error.error, 'error');
         }
     } catch (error) {
         console.error('Error saving expense:', error);
-        alert('Error saving expense. Please try again.');
+        showNotification('Error saving expense. Please try again.', 'error');
     }
 }
 
@@ -584,14 +609,14 @@ async function handleCCPaymentSubmit(e) {
             await loadCreditCardPayments();
             await loadRecentCCPayments();
             
-            alert(wasEditing ? 'Payment updated!' : 'Payment added!');
+            showNotification(wasEditing ? 'Payment updated!' : 'Payment added!');
         } else {
             const error = await response.json();
-            alert('Error: ' + error.error);
+            showNotification('Error: ' + error.error, 'error');
         }
     } catch (error) {
         console.error('Error saving payment:', error);
-        alert('Error saving payment. Please try again.');
+        showNotification('Error saving payment. Please try again.', 'error');
     }
 }
 
@@ -621,13 +646,15 @@ async function deleteExpense(id) {
         
         if (response.ok) {
             await loadExpenses();
+            await loadRecentExpenses(); // Also refresh recent expenses
             displayExpenses();
+            showNotification('Expense deleted!', 'info');
         } else {
-            alert('Error deleting expense');
+            showNotification('Error deleting expense', 'error');
         }
     } catch (error) {
         console.error('Error deleting expense:', error);
-        alert('Error deleting expense');
+        showNotification('Error deleting expense', 'error');
     }
 }
 
@@ -919,12 +946,14 @@ async function deleteCCPayment(id) {
         if (response.ok) {
             await loadCreditCardPayments();
             await loadRecentCCPayments();
+            displayCCPayments(); // Also refresh the view
+            showNotification('Payment deleted!', 'info');
         } else {
-            alert('Error deleting payment');
+            showNotification('Error deleting payment', 'error');
         }
     } catch (error) {
         console.error('Error deleting payment:', error);
-        alert('Error deleting payment');
+        showNotification('Error deleting payment', 'error');
     }
 }
 
@@ -934,7 +963,7 @@ async function duplicateExpenses() {
     const month = document.getElementById('duplicate-month').value;
     
     if (!year || !month) {
-        alert('Please select both year and month to duplicate from.');
+        showNotification('Please select both year and month to duplicate from.', 'warning');
         return;
     }
     
@@ -957,7 +986,7 @@ async function duplicateExpenses() {
         const expensesToDuplicate = await response.json();
         
         if (expensesToDuplicate.length === 0) {
-            alert(`No expenses found for ${getMonthName(month)} ${year}.`);
+            showNotification(`No expenses found for ${getMonthName(month)} ${year}.`, 'warning');
             return;
         }
         
@@ -1003,7 +1032,7 @@ async function duplicateExpenses() {
         if (failCount > 0) {
             message += ` ${failCount} expenses failed to duplicate.`;
         }
-        alert(message);
+        showNotification(message, successCount > 0 ? 'success' : 'warning', 2000);
         
         // Refresh data
         await loadExpenseTypes();
@@ -1014,7 +1043,7 @@ async function duplicateExpenses() {
         
     } catch (error) {
         console.error('Error duplicating expenses:', error);
-        alert('Error duplicating expenses. Please try again.');
+        showNotification('Error duplicating expenses. Please try again.', 'error');
     } finally {
         duplicateBtn.disabled = false;
         duplicateBtn.textContent = 'Duplicate Expenses';
@@ -1054,7 +1083,7 @@ async function handlePaymentMethodSubmit(e) {
             await loadCreditCards();
             displayPaymentMethods();
             
-            alert(editingPaymentMethod ? 'Payment method updated!' : 'Payment method added!');
+            showNotification(editingPaymentMethod ? 'Payment method updated!' : 'Payment method added!');
         } else {
             const error = await response.json();
             alert('Error: ' + error.error);
@@ -1164,7 +1193,7 @@ async function duplicateCCPayments() {
     const month = document.getElementById('duplicate-cc-month').value;
     
     if (!year || !month) {
-        alert('Please select both year and month to duplicate from.');
+        showNotification('Please select both year and month to duplicate from.', 'warning');
         return;
     }
     
@@ -1187,7 +1216,7 @@ async function duplicateCCPayments() {
         const paymentsToDuplicate = await response.json();
         
         if (paymentsToDuplicate.length === 0) {
-            alert(`No credit card payments found for ${getMonthName(month)} ${year}.`);
+            showNotification(`No credit card payments found for ${getMonthName(month)} ${year}.`, 'warning');
             return;
         }
         
@@ -1230,7 +1259,7 @@ async function duplicateCCPayments() {
         if (failCount > 0) {
             message += ` ${failCount} payments failed to duplicate.`;
         }
-        alert(message);
+        showNotification(message, successCount > 0 ? 'success' : 'warning', 2000);
         
         // Refresh data
         await loadCreditCards();
@@ -1239,7 +1268,7 @@ async function duplicateCCPayments() {
         
     } catch (error) {
         console.error('Error duplicating credit card payments:', error);
-        alert('Error duplicating credit card payments. Please try again.');
+        showNotification('Error duplicating credit card payments. Please try again.', 'error');
     } finally {
         duplicateBtn.disabled = false;
         duplicateBtn.textContent = 'Duplicate Payments';
@@ -1253,4 +1282,154 @@ function getMonthName(monthNumber) {
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return months[parseInt(monthNumber) - 1];
+}
+
+// Notification System
+function showNotification(message, type = 'success', duration = 1000) {
+    const container = document.getElementById('notification-container');
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    container.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (container.contains(notification)) {
+                container.removeChild(notification);
+            }
+        }, 300);
+    }, duration);
+}
+
+// Database Management Functions
+function backupDatabase() {
+    try {
+        // Create a link to download the backup
+        const link = document.createElement('a');
+        link.href = `${API_BASE}/database/backup`;
+        link.download = `spending-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.db`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error backing up database:', error);
+        showNotification('Error backing up database. Please try again.', 'error');
+    }
+}
+
+function handleFileSelect() {
+    const fileInput = document.getElementById('import-file');
+    const importBtn = document.getElementById('import-db-btn');
+    
+    if (fileInput.files.length > 0) {
+        importBtn.disabled = false;
+    } else {
+        importBtn.disabled = true;
+    }
+}
+
+async function importDatabase() {
+    const fileInput = document.getElementById('import-file');
+    const importBtn = document.getElementById('import-db-btn');
+    const statusDiv = document.getElementById('import-status');
+    
+    if (fileInput.files.length === 0) {
+        showNotification('Please select a database file to import.', 'warning');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    if (!confirm('Are you sure you want to import this database? This will merge the data with your current database.')) {
+        return;
+    }
+    
+    try {
+        importBtn.disabled = true;
+        importBtn.textContent = 'Importing...';
+        statusDiv.innerHTML = '<p style="color: #f39c12;">Importing database...</p>';
+        
+        const formData = new FormData();
+        formData.append('dbFile', file);
+        
+        const response = await fetch(`${API_BASE}/database/import`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            statusDiv.innerHTML = `<p style="color: #27ae60;">Import successful! Imported: ${JSON.stringify(result.imported)}</p>`;
+            fileInput.value = '';
+            
+            // Refresh all data
+            await loadExpenseTypes();
+            await loadExpenseNames();
+            await loadPaymentMethods();
+            await loadCreditCards();
+            await loadExpenses();
+            await loadCreditCardPayments();
+        } else {
+            statusDiv.innerHTML = `<p style="color: #e74c3c;">Import failed: ${result.error}</p>`;
+        }
+    } catch (error) {
+        console.error('Error importing database:', error);
+        statusDiv.innerHTML = '<p style="color: #e74c3c;">Import failed. Please check the file and try again.</p>';
+    } finally {
+        importBtn.disabled = true;
+        importBtn.textContent = 'Import Database';
+    }
+}
+
+async function clearDatabase() {
+    if (!confirm('WARNING: This will permanently delete ALL your data. This action cannot be undone. Are you absolutely sure?')) {
+        return;
+    }
+    
+    if (!confirm('Last chance! This will erase your entire database. Type "YES" to confirm.')) {
+        return;
+    }
+    
+    const clearBtn = document.getElementById('clear-db-btn');
+    const statusDiv = document.getElementById('clear-status');
+    
+    try {
+        clearBtn.disabled = true;
+        clearBtn.textContent = 'Clearing...';
+        statusDiv.innerHTML = '<p style="color: #f39c12;">Clearing database...</p>';
+        
+        const response = await fetch(`${API_BASE}/database/clear`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            statusDiv.innerHTML = '<p style="color: #27ae60;">Database cleared successfully!</p>';
+            
+            // Refresh all data
+            await loadExpenseTypes();
+            await loadExpenseNames();
+            await loadPaymentMethods();
+            await loadCreditCards();
+            await loadExpenses();
+            await loadCreditCardPayments();
+            
+            // Clear forms
+            clearForm();
+            clearCCForm();
+        } else {
+            statusDiv.innerHTML = `<p style="color: #e74c3c;">Clear failed: ${result.error}</p>`;
+        }
+    } catch (error) {
+        console.error('Error clearing database:', error);
+        statusDiv.innerHTML = '<p style="color: #e74c3c;">Clear failed. Please try again.</p>';
+    } finally {
+        clearBtn.disabled = false;
+        clearBtn.textContent = 'Clear All Data';
+    }
 }

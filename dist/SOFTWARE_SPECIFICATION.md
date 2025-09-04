@@ -113,12 +113,13 @@ SpendingTracker/
 ## 5. User Interface
 
 ### Navigation
-Five main tabs with visual feedback for active section:
+Six main tabs with visual feedback for active section:
 - **Add Expense** - Primary data entry for individual expenses
 - **Credit Card Payments** - Dedicated entry for credit card payments  
 - **View All** - Combined view of expenses and payments
 - **Payment Methods** - Management of payment methods (create/edit/delete)
 - **Reports** - Monthly and yearly spending analysis
+- **Database** - Data backup, import, and management operations
 
 ### Add Expense Tab (Split Screen)
 **Left Side: Entry Form**
@@ -172,6 +173,13 @@ Five main tabs with visual feedback for active section:
 - Grouped by expense type with category and payment method details
 - **Excel Export**: One-click export to .xlsx format with multiple sheets
 
+### Database Tab
+- **Backup**: Download timestamped database backup files for safe storage
+- **Import**: Merge data from backup files without erasing current database (fixed foreign key mapping)
+- **Clear**: Complete database reset with double confirmation safeguards
+- **File Validation**: Ensures uploaded files are valid SQLite databases
+- **Smart Import**: Properly maps expense types, categories, and payment methods
+
 ## 6. Key Features
 
 ### Dynamic Data Creation
@@ -190,15 +198,24 @@ Five main tabs with visual feedback for active section:
 - **Date normalization**: All duplicated items use today's date
 - **Progress feedback**: Button states and success messages
 
-### "Others" Calculation
+### "Untracked Expenses" Calculation
 **Purpose**: Track unrecorded credit card expenses
-**Calculation**: `Others = Credit Card Payment - Sum of Individual Expenses`
-**Implementation**: Automatically calculated in monthly reports
+**Calculation**: `Untracked Expenses = Credit Card Payment - Sum of Individual Expenses`
+**Implementation**: Automatically calculated in both monthly and yearly reports
+**Display**: Shows as separate expense type "Untracked Expenses"
+
+### User Experience Enhancements
+- **Toast Notifications**: Auto-dismissing success/error messages (no clicking "OK")
+- **Auto-refresh**: Lists update immediately after all operations
+- **Color-coded Feedback**: Green (success), red (error), orange (warning), blue (info)
+- **Smooth Animations**: Notifications slide in from right with fade-out
+- **Non-blocking UI**: Operations don't require user acknowledgment
 
 ### Split-Screen Design
 - **Efficient workflow**: Enter data on left, see results on right
-- **Real-time updates**: New entries appear immediately
+- **Real-time updates**: New entries appear immediately across all views
 - **Context preservation**: Stay in current tab while editing
+- **Auto-refresh**: Recent lists update after duplications and deletions
 
 ## 7. User Workflows
 

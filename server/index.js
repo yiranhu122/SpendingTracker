@@ -8,6 +8,7 @@ const XLSX = require('xlsx');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
 
 app.use(cors());
 app.use(express.json());
@@ -356,10 +357,12 @@ app.delete('/api/expenses/:id', (req, res) => {
   });
 });
 
-// Get yearly summary
+// Get yearly summary with "untracked expenses" calculation
 app.get('/api/reports/yearly/:year', (req, res) => {
   const { year } = req.params;
-  const query = `
+  
+  // First get regular expenses for the year
+  const expenseQuery = `
     SELECT 
       et.name as expense_type,
       c.name as category,
@@ -376,16 +379,70 @@ app.get('/api/reports/yearly/:year', (req, res) => {
     ORDER BY et.name, c.name, total DESC
   `;
   
-  db.all(query, [year], (err, rows) => {
+  // Get credit card payments for the year
+  const paymentsQuery = `
+    SELECT credit_card_name, SUM(payment_amount) as total_payments
+    FROM credit_card_payments 
+    WHERE strftime('%Y', date) = ?
+    GROUP BY credit_card_name
+  `;
+  
+  // Get sum of expenses by credit card for the year
+  const cardExpensesQuery = `
+    SELECT pm.name as credit_card_name, SUM(e.amount) as total_expenses
+    FROM expenses e
+    JOIN payment_methods pm ON e.payment_method_id = pm.id
+    WHERE pm.type = 'credit_card' 
+      AND strftime('%Y', e.date) = ?
+    GROUP BY pm.name
+  `;
+  
+  db.all(expenseQuery, [year], (err, expenseRows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json(rows);
+    
+    db.all(paymentsQuery, [year], (err, paymentRows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      db.all(cardExpensesQuery, [year], (err, cardExpenseRows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        
+        // Calculate "untracked expenses" for each credit card
+        const untrackedData = [];
+        paymentRows.forEach(payment => {
+          const cardExpenses = cardExpenseRows.find(ce => ce.credit_card_name === payment.credit_card_name);
+          const expenseTotal = cardExpenses ? cardExpenses.total_expenses : 0;
+          const untrackedAmount = payment.total_payments - expenseTotal;
+          
+          if (untrackedAmount > 0) {
+            untrackedData.push({
+              expense_type: 'Untracked Expenses',
+              category: `${payment.credit_card_name} - Untracked`,
+              payment_method: payment.credit_card_name,
+              payment_method_type: 'credit_card',
+              total: untrackedAmount,
+              transaction_count: 1
+            });
+          }
+        });
+        
+        // Combine regular expenses with "untracked expenses"
+        const combinedData = [...expenseRows, ...untrackedData];
+        res.json(combinedData);
+      });
+    });
   });
 });
 
-// Get monthly summary with "others" calculation
+// Get monthly summary with "untracked expenses" calculation
 app.get('/api/reports/monthly/:year/:month', (req, res) => {
   const { year, month } = req.params;
   const paddedMonth = month.padStart(2, '0');
@@ -445,27 +502,27 @@ app.get('/api/reports/monthly/:year/:month', (req, res) => {
           return;
         }
         
-        // Calculate "others" for each credit card
-        const othersData = [];
+        // Calculate "untracked expenses" for each credit card
+        const untrackedData = [];
         paymentRows.forEach(payment => {
           const cardExpenses = cardExpenseRows.find(ce => ce.credit_card_name === payment.credit_card_name);
           const expenseTotal = cardExpenses ? cardExpenses.total_expenses : 0;
-          const othersAmount = payment.total_payments - expenseTotal;
+          const untrackedAmount = payment.total_payments - expenseTotal;
           
-          if (othersAmount > 0) {
-            othersData.push({
-              expense_type: 'Others',
-              category: `${payment.credit_card_name} - Others`,
+          if (untrackedAmount > 0) {
+            untrackedData.push({
+              expense_type: 'Untracked Expenses',
+              category: `${payment.credit_card_name} - Untracked`,
               payment_method: payment.credit_card_name,
               payment_method_type: 'credit_card',
-              total: othersAmount,
+              total: untrackedAmount,
               transaction_count: 1
             });
           }
         });
         
-        // Combine regular expenses with "others"
-        const combinedData = [...expenseRows, ...othersData];
+        // Combine regular expenses with "untracked expenses"
+        const combinedData = [...expenseRows, ...untrackedData];
         res.json(combinedData);
       });
     });
@@ -653,27 +710,27 @@ app.get('/api/reports/export/monthly/:year/:month', (req, res) => {
           return;
         }
         
-        // Calculate "others" for each credit card
-        const othersData = [];
+        // Calculate "untracked expenses" for each credit card
+        const untrackedData = [];
         paymentRows.forEach(payment => {
           const cardExpenses = cardExpenseRows.find(ce => ce.credit_card_name === payment.credit_card_name);
           const expenseTotal = cardExpenses ? cardExpenses.total_expenses : 0;
-          const othersAmount = payment.total_payments - expenseTotal;
+          const untrackedAmount = payment.total_payments - expenseTotal;
           
-          if (othersAmount > 0) {
-            othersData.push({
-              expense_type: 'Others',
-              category: `${payment.credit_card_name} - Others`,
+          if (untrackedAmount > 0) {
+            untrackedData.push({
+              expense_type: 'Untracked Expenses',
+              category: `${payment.credit_card_name} - Untracked`,
               payment_method: payment.credit_card_name,
               payment_method_type: 'credit_card',
-              total: othersAmount,
+              total: untrackedAmount,
               transaction_count: 1
             });
           }
         });
         
-        // Combine regular expenses with "others"
-        const combinedData = [...expenseRows, ...othersData];
+        // Combine regular expenses with "untracked expenses"
+        const combinedData = [...expenseRows, ...untrackedData];
         
         // Create Excel workbook
         const wb = XLSX.utils.book_new();
@@ -762,7 +819,9 @@ app.get('/api/reports/export/monthly/:year/:month', (req, res) => {
 // Export yearly report to Excel
 app.get('/api/reports/export/yearly/:year', (req, res) => {
   const { year } = req.params;
-  const query = `
+  
+  // Get the same data as the yearly report (with Others calculation)
+  const expenseQuery = `
     SELECT 
       et.name as expense_type,
       c.name as category,
@@ -779,11 +838,61 @@ app.get('/api/reports/export/yearly/:year', (req, res) => {
     ORDER BY et.name, c.name, total DESC
   `;
   
-  db.all(query, [year], (err, rows) => {
+  const paymentsQuery = `
+    SELECT credit_card_name, SUM(payment_amount) as total_payments
+    FROM credit_card_payments 
+    WHERE strftime('%Y', date) = ?
+    GROUP BY credit_card_name
+  `;
+  
+  const cardExpensesQuery = `
+    SELECT pm.name as credit_card_name, SUM(e.amount) as total_expenses
+    FROM expenses e
+    JOIN payment_methods pm ON e.payment_method_id = pm.id
+    WHERE pm.type = 'credit_card' 
+      AND strftime('%Y', e.date) = ?
+    GROUP BY pm.name
+  `;
+  
+  db.all(expenseQuery, [year], (err, expenseRows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
+    
+    db.all(paymentsQuery, [year], (err, paymentRows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      db.all(cardExpensesQuery, [year], (err, cardExpenseRows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        
+        // Calculate "untracked expenses" for each credit card
+        const untrackedData = [];
+        paymentRows.forEach(payment => {
+          const cardExpenses = cardExpenseRows.find(ce => ce.credit_card_name === payment.credit_card_name);
+          const expenseTotal = cardExpenses ? cardExpenses.total_expenses : 0;
+          const untrackedAmount = payment.total_payments - expenseTotal;
+          
+          if (untrackedAmount > 0) {
+            untrackedData.push({
+              expense_type: 'Untracked Expenses',
+              category: `${payment.credit_card_name} - Untracked`,
+              payment_method: payment.credit_card_name,
+              payment_method_type: 'credit_card',
+              total: untrackedAmount,
+              transaction_count: 1
+            });
+          }
+        });
+        
+        // Combine regular expenses with "untracked expenses"
+        const combinedData = [...expenseRows, ...untrackedData];
     
     // Create Excel workbook
     const wb = XLSX.utils.book_new();
@@ -795,14 +904,14 @@ app.get('/api/reports/export/yearly/:year', (req, res) => {
       [`Generated: ${new Date().toLocaleDateString()}`],
       [''],
       ['SUMMARY'],
-      ['Total Expenses:', `$${rows.reduce((sum, item) => sum + item.total, 0).toFixed(2)}`],
-      ['Total Transactions:', rows.reduce((sum, item) => sum + item.transaction_count, 0)],
+      ['Total Expenses:', `$${combinedData.reduce((sum, item) => sum + item.total, 0).toFixed(2)}`],
+      ['Total Transactions:', combinedData.reduce((sum, item) => sum + item.transaction_count, 0)],
       [''],
       ['BREAKDOWN BY EXPENSE TYPE'],
       ['Expense Type', 'Category', 'Payment Method', 'Amount', 'Transactions']
     ];
     
-    rows.forEach(item => {
+    combinedData.forEach(item => {
       summaryData.push([
         item.expense_type,
         item.category,
@@ -817,7 +926,7 @@ app.get('/api/reports/export/yearly/:year', (req, res) => {
     XLSX.utils.book_append_sheet(wb, ws_summary, 'Summary');
     
     // Create detailed sheets by expense type
-    const groupedData = rows.reduce((acc, item) => {
+    const groupedData = combinedData.reduce((acc, item) => {
       if (!acc[item.expense_type]) acc[item.expense_type] = [];
       acc[item.expense_type].push(item);
       return acc;
@@ -853,6 +962,8 @@ app.get('/api/reports/export/yearly/:year', (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="spending-report-${year}.xlsx"`);
     
     res.send(excelBuffer);
+      });
+    });
   });
 });
 
@@ -865,23 +976,323 @@ function getMonthName(monthNumber) {
   return months[monthNumber - 1];
 }
 
+// Database management endpoints
+app.get('/api/database/backup', (req, res) => {
+  const fs = require('fs');
+  const { dbPath } = require('./database');
+  
+  try {
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Database file not found' });
+    }
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `spending-backup-${timestamp}.db`;
+    
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    
+    const readStream = fs.createReadStream(dbPath);
+    readStream.pipe(res);
+    
+    readStream.on('error', (err) => {
+      console.error('Error reading database file:', err);
+      res.status(500).json({ error: 'Failed to read database file' });
+    });
+  } catch (err) {
+    console.error('Backup error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/database/import', (req, res) => {
+  const fs = require('fs');
+  const multer = require('multer');
+  const sqlite3 = require('sqlite3').verbose();
+  
+  // Configure multer for file upload
+  const storage = multer.memoryStorage();
+  const upload = multer({ storage: storage });
+  
+  upload.single('dbFile')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: 'File upload failed' });
+    }
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    // Write uploaded file to temporary location
+    const tempPath = `./temp-import-${Date.now()}.db`;
+    fs.writeFileSync(tempPath, req.file.buffer);
+    
+    // Open the imported database
+    const importDb = new sqlite3.Database(tempPath, (err) => {
+      if (err) {
+        fs.unlinkSync(tempPath);
+        return res.status(400).json({ error: 'Invalid database file' });
+      }
+      
+      // Import data from each table
+      importData(importDb, tempPath, res);
+    });
+  });
+});
+
+app.delete('/api/database/clear', (req, res) => {
+  const tables = ['expenses', 'credit_card_payments', 'expense_types', 'categories', 'payment_methods'];
+  
+  db.serialize(() => {
+    db.run('BEGIN TRANSACTION');
+    
+    let completed = 0;
+    const totalTables = tables.length;
+    
+    tables.forEach(table => {
+      db.run(`DELETE FROM ${table}`, (err) => {
+        if (err) {
+          db.run('ROLLBACK');
+          return res.status(500).json({ error: `Failed to clear ${table}: ${err.message}` });
+        }
+        
+        completed++;
+        if (completed === totalTables) {
+          db.run('COMMIT', (err) => {
+            if (err) {
+              return res.status(500).json({ error: 'Failed to commit transaction' });
+            }
+            res.json({ message: 'Database cleared successfully' });
+          });
+        }
+      });
+    });
+  });
+});
+
+// Helper function to import data from uploaded database
+function importData(importDb, tempPath, res) {
+  const fs = require('fs');
+  const tables = ['expense_types', 'categories', 'payment_methods', 'expenses', 'credit_card_payments'];
+  
+  let completed = 0;
+  let importedCounts = {};
+  
+  db.serialize(() => {
+    db.run('BEGIN TRANSACTION');
+    
+    function processTable(tableIndex) {
+      if (tableIndex >= tables.length) {
+        db.run('COMMIT', (err) => {
+          // Close the imported database connection before deleting temp file
+          importDb.close((closeErr) => {
+            try {
+              fs.unlinkSync(tempPath);
+            } catch (unlinkErr) {
+              console.warn('Warning: Could not delete temporary file:', unlinkErr.message);
+            }
+            
+            if (err) {
+              return res.status(500).json({ error: 'Failed to commit import transaction' });
+            }
+            res.json({ 
+              message: 'Database imported successfully',
+              imported: importedCounts
+            });
+          });
+        });
+        return;
+      }
+      
+      const table = tables[tableIndex];
+      
+      importDb.all(`SELECT * FROM ${table}`, (err, rows) => {
+        if (err) {
+          importDb.close((closeErr) => {
+            try {
+              fs.unlinkSync(tempPath);
+            } catch (unlinkErr) {
+              console.warn('Warning: Could not delete temporary file:', unlinkErr.message);
+            }
+          });
+          db.run('ROLLBACK');
+          return res.status(500).json({ error: `Failed to read ${table} from import file` });
+        }
+        
+        if (rows.length === 0) {
+          importedCounts[table] = 0;
+          processTable(tableIndex + 1);
+          return;
+        }
+        
+        // Insert rows with conflict resolution
+        let insertedCount = 0;
+        let processedCount = 0;
+        
+        if (table === 'expenses') {
+          // Handle expenses with proper foreign key lookup
+          let processedCount = 0;
+          let insertedCount = 0;
+          
+          rows.forEach(async (row) => {
+            try {
+              // Get the names from the imported database first
+              const expenseTypeName = await new Promise((resolve, reject) => {
+                importDb.get('SELECT name FROM expense_types WHERE id = ?', [row.expense_type_id], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.name : null);
+                });
+              });
+              
+              const categoryName = await new Promise((resolve, reject) => {
+                importDb.get('SELECT name FROM categories WHERE id = ?', [row.category_id], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.name : null);
+                });
+              });
+              
+              const paymentMethodName = await new Promise((resolve, reject) => {
+                importDb.get('SELECT name FROM payment_methods WHERE id = ?', [row.payment_method_id], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.name : null);
+                });
+              });
+              
+              // Get the current database IDs by name
+              const currentExpenseTypeId = await new Promise((resolve, reject) => {
+                db.get('SELECT id FROM expense_types WHERE name = ?', [expenseTypeName], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.id : null);
+                });
+              });
+              
+              const currentCategoryId = await new Promise((resolve, reject) => {
+                db.get('SELECT id FROM categories WHERE name = ?', [categoryName], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.id : null);
+                });
+              });
+              
+              const currentPaymentMethodId = await new Promise((resolve, reject) => {
+                db.get('SELECT id FROM payment_methods WHERE name = ?', [paymentMethodName], (err, result) => {
+                  if (err) reject(err);
+                  else resolve(result ? result.id : null);
+                });
+              });
+              
+              // Only insert if all IDs are found
+              if (currentExpenseTypeId && currentCategoryId && currentPaymentMethodId) {
+                db.run(
+                  'INSERT INTO expenses (date, expense_type_id, category_id, payment_method_id, description, amount, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                  [row.date, currentExpenseTypeId, currentCategoryId, currentPaymentMethodId, row.description, row.amount, row.notes],
+                  function(err) {
+                    processedCount++;
+                    if (!err && this.changes > 0) {
+                      insertedCount++;
+                    }
+                    
+                    if (processedCount === rows.length) {
+                      importedCounts[table] = insertedCount;
+                      processTable(tableIndex + 1);
+                    }
+                  }
+                );
+              } else {
+                processedCount++;
+                console.warn('Skipping expense import - missing reference data:', {
+                  expenseTypeName, categoryName, paymentMethodName
+                });
+                
+                if (processedCount === rows.length) {
+                  importedCounts[table] = insertedCount;
+                  processTable(tableIndex + 1);
+                }
+              }
+            } catch (error) {
+              processedCount++;
+              console.error('Error processing expense row:', error);
+              
+              if (processedCount === rows.length) {
+                importedCounts[table] = insertedCount;
+                processTable(tableIndex + 1);
+              }
+            }
+          });
+        } else {
+          // Handle other tables normally
+          rows.forEach(row => {
+            let insertQuery, values;
+            
+            if (table === 'expense_types' || table === 'categories') {
+              insertQuery = `INSERT OR IGNORE INTO ${table} (name) VALUES (?)`;
+              values = [row.name];
+            } else if (table === 'payment_methods') {
+              insertQuery = `INSERT OR IGNORE INTO ${table} (name, type) VALUES (?, ?)`;
+              values = [row.name, row.type];
+            } else if (table === 'credit_card_payments') {
+              insertQuery = `INSERT INTO ${table} (date, credit_card_name, payment_amount, notes) VALUES (?, ?, ?, ?)`;
+              values = [row.date, row.credit_card_name, row.payment_amount, row.notes];
+            }
+            
+            db.run(insertQuery, values, function(err) {
+              processedCount++;
+              if (!err && this.changes > 0) {
+                insertedCount++;
+              }
+              
+              if (processedCount === rows.length) {
+                importedCounts[table] = insertedCount;
+                processTable(tableIndex + 1);
+              }
+            });
+          });
+        }
+      });
+    }
+    
+    processTable(0);
+  });
+}
+
 // Exit endpoint to shutdown the server
 app.post('/api/exit', (req, res) => {
   console.log('Shutdown request received');
   res.json({ message: 'Server shutting down' });
-  
+
   // Give time for response to be sent, then exit
   setTimeout(() => {
     process.exit(0);
   }, 500);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Opening Spending Tracker at http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on ${HOST}:${PORT}`);
+  console.log(`Access Spending Tracker at http://localhost:${PORT}`);
+
+  // Get network IP for remote access info
+  const os = require('os');
+  const networkInterfaces = os.networkInterfaces();
+  const networkIPs = [];
   
-  // Automatically open browser (delay to ensure server is ready)
-  setTimeout(() => {
-    open(`http://localhost:${PORT}`);
-  }, 1000);
+  Object.keys(networkInterfaces).forEach(key => {
+    networkInterfaces[key].forEach(details => {
+      if (details.family === 'IPv4' && !details.internal) {
+        networkIPs.push(details.address);
+      }
+    });
+  });
+  
+  if (networkIPs.length > 0) {
+    console.log(`Network access available at:`);
+    networkIPs.forEach(ip => {
+      console.log(`  http://${ip}:${PORT}`);
+    });
+  }
+
+  // Only auto-open browser if not running in NAS mode
+  if (!process.env.NAS_MODE) {
+    setTimeout(() => {
+      open(`http://localhost:${PORT}`);
+    }, 1000);
+  }
 });

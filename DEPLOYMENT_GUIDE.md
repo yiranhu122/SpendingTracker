@@ -1,16 +1,24 @@
 # Spending Tracker - Deployment Guide
 
-## Standalone Executable
+## Deployment Options
 
-### Quick Start
-1. **Download**: Get the `spending-tracker.exe` file from the `dist` folder
-2. **Run**: Double-click `spending-tracker.exe`
+### Option 1: Standalone Executables
+
+#### Windows Desktop
+1. **Download**: Get `spending-tracker-win.exe` from the `dist` folder
+2. **Run**: Double-click `spending-tracker-win.exe`
 3. **Use**: Browser will automatically open to the application
-4. **Data**: Your database file (`spending.db`) will be created in the same folder as the executable
+4. **Data**: Your database file (`spending.db`) will be created in the same folder
+
+#### Linux/Mac Desktop
+1. **Download**: Get `spending-tracker-linux` or `spending-tracker-mac`
+2. **Make executable**: `chmod +x spending-tracker-linux`
+3. **Run**: `./spending-tracker-linux`
+4. **Access**: Open browser to `http://localhost:3001`
 
 ### Files Created
 When you run the executable, it creates:
-- `spending.db` - Your expense database (backup this file!)
+- `spending.db` - Your expense database (use the Database tab to create backups!)
 - Console window showing server status
 
 ### System Requirements
@@ -21,14 +29,39 @@ When you run the executable, it creates:
 
 ### Features Included
 - ✅ Complete expense tracking with three-level hierarchy (Type → Expense → Payment Method)
-- ✅ Credit card payment tracking with automatic "Others" calculation
+- ✅ Credit card payment tracking with automatic "Untracked Expenses" calculation
 - ✅ Duplicate from previous month for both expenses and payments
 - ✅ Payment Methods management (dedicated tab for creating/editing payment methods)
-- ✅ Monthly/yearly reports with "Others" calculation
+- ✅ Monthly/yearly reports with "Untracked Expenses" calculation
 - ✅ Excel export functionality (.xlsx format with multiple sheets)
 - ✅ Edit/delete functionality with visual indicators
 - ✅ Split-screen interface for immediate feedback
 - ✅ Export-ready data in SQLite format
+- ✅ Database management with backup/import/clear functionality  
+- ✅ Toast notifications with auto-dismiss (no clicking "OK")
+- ✅ Network access support for multi-device use
+
+### Option 2: Docker Container (QNAP NAS)
+
+#### Quick Setup
+```bash
+# Copy files to QNAP Container Station
+cd /share/Container/spending-tracker
+docker compose up -d
+```
+
+#### Features
+- **Network Access**: Available to all devices on your network
+- **Data Persistence**: Database stored in Docker volume
+- **Health Monitoring**: Container Station health checks
+- **Easy Management**: Start/stop from Container Station GUI
+- **Auto-restart**: Container restarts if application crashes
+
+#### Network URL
+- Access from any device: `http://[qnap-ip]:3001`
+- Mobile responsive design works on phones/tablets
+
+See `QNAP_CONTAINER_GUIDE.md` for complete Docker deployment instructions.
 
 ## Manual Installation (For Developers)
 

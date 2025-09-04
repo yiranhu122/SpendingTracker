@@ -5,13 +5,14 @@ A full-stack web application for tracking personal expenses and generating spend
 ## Features
 
 - **Three-level expense hierarchy**: Expense Type → Expense → Payment Method
-- **Credit card payment tracking** with automatic "Others" calculation  
+- **Credit card payment tracking** with automatic "Untracked Expenses" calculation  
 - **Duplicate from previous month** for both expenses and payments
 - **Payment Methods management** with dedicated tab for setup
+- **Database management** with backup, import, and clear functionality
 - **Split-screen interface** for immediate feedback during data entry
 - **Edit/delete functionality** with visual indicators and safety checks
 - **Advanced filtering** by multiple criteria
-- **Monthly/yearly reports** with intelligent "Others" calculation
+- **Monthly/yearly reports** with intelligent "Untracked Expenses" calculation
 - **Excel export functionality** for professional report analysis
 - **Combo input fields** for dynamic creation of expense types and names
 
@@ -59,13 +60,14 @@ npm run dev
 2. **Add first month's data**: Enter expenses and credit card payments manually
 
 ### Daily Usage  
-1. **Add Expense**: Split-screen interface with immediate feedback
-2. **Credit Card Payments**: Track actual payments to credit cards
+1. **Add Expense**: Split-screen interface with immediate feedback and auto-refresh
+2. **Credit Card Payments**: Track actual payments to credit cards with notifications
 3. **Duplicate Previous Month**: One-click duplication of recurring expenses/payments
-4. **View All**: See complete overview of expenses and payments
+4. **View All**: See complete overview of expenses and payments with auto-refresh
 5. **Payment Methods**: Manage your payment methods (credit cards and bank accounts)
-6. **Reports**: Generate monthly/yearly summaries with "Others" calculation
-7. **Excel Export**: Download reports in .xlsx format for advanced analysis
+6. **Database**: Backup, import, and manage your data safely
+7. **Reports**: Generate monthly/yearly summaries with "Untracked Expenses" calculation
+8. **Excel Export**: Download reports in .xlsx format for advanced analysis
 
 ## Database Schema
 
@@ -103,6 +105,55 @@ The application uses SQLite with five main tables:
 
 ### Reports
 - `GET /api/reports/yearly/:year` - Get yearly spending report
-- `GET /api/reports/monthly/:year/:month` - Get monthly spending report with "Others"
+- `GET /api/reports/monthly/:year/:month` - Get monthly spending report with "Untracked Expenses"
 - `GET /api/reports/export/yearly/:year` - Export yearly report to Excel
 - `GET /api/reports/export/monthly/:year/:month` - Export monthly report to Excel
+
+### Database Management
+- `GET /api/database/backup` - Download database backup
+- `POST /api/database/import` - Import database with data merging
+- `DELETE /api/database/clear` - Clear all database data
+
+## Deployment Options
+
+### Local Desktop Use
+- **Windows**: Run `spending-tracker-win.exe`
+- **Linux**: Run `spending-tracker-linux`
+- **macOS**: Run `spending-tracker-mac`
+
+### Network/NAS Deployment
+
+#### Docker Container (Recommended for QNAP NAS)
+```bash
+# Deploy to QNAP Container Station
+docker compose up -d
+```
+- See `QNAP_CONTAINER_GUIDE.md` for detailed instructions
+- Accessible from any device on your network
+- Data persistence with volume mounting
+
+#### Source Code on NAS
+```bash
+# Install dependencies
+npm install
+
+# Start in network mode
+npm run nas
+```
+
+#### Pre-built Executable on NAS
+```bash
+# Set environment and run
+NAS_MODE=true ./spending-tracker-linux
+```
+
+### Network Access
+- **URL Format**: `http://[nas-ip]:3001`
+- **Mobile Friendly**: Works on phones, tablets, any browser
+- **Auto-refresh**: Lists update automatically across devices
+- **Toast Notifications**: No more clicking "OK" on success messages
+
+## Security Notes
+- **Local Network Only**: Not intended for internet exposure
+- **No Authentication**: Relies on network-level security
+- **VPN Recommended**: For remote access outside home network
