@@ -15,6 +15,18 @@ let editingExpense = null;
 let editingPayment = null;
 let editingPaymentMethod = null;
 
+// Helper function to format date without timezone issues
+function formatDateDisplay(dateString) {
+    if (!dateString) return '';
+    // Parse the date string as local date to avoid timezone conversion
+    const parts = dateString.split('-');
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+    const day = parseInt(parts[2]);
+    const date = new Date(year, month, day);
+    return date.toLocaleDateString();
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     // Setup event listeners first so navigation always works
@@ -45,7 +57,8 @@ function setupEventListeners() {
     // Navigation
     document.getElementById('add-expense-btn').addEventListener('click', () => showSection('add-expense'));
     document.getElementById('cc-payments-btn').addEventListener('click', () => showSection('cc-payments'));
-    document.getElementById('view-all-btn').addEventListener('click', () => showSection('view-all'));
+    document.getElementById('view-expenses-btn').addEventListener('click', () => showSection('view-expenses'));
+    document.getElementById('view-payments-btn').addEventListener('click', () => showSection('view-payments'));
     document.getElementById('payment-methods-btn').addEventListener('click', () => showSection('payment-methods'));
     document.getElementById('reports-btn').addEventListener('click', () => showSection('reports'));
     document.getElementById('database-btn').addEventListener('click', () => showSection('database'));
@@ -90,8 +103,9 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
     document.getElementById(`${sectionId}-btn`).classList.add('active');
     
-    if (sectionId === 'view-all') {
+    if (sectionId === 'view-expenses') {
         displayExpenses();
+    } else if (sectionId === 'view-payments') {
         displayCCPayments();
     } else if (sectionId === 'add-expense') {
         loadRecentExpenses();
@@ -345,12 +359,14 @@ async function handleExpenseSubmit(e) {
         
         if (response.ok) {
             const wasEditing = editingExpense !== null;
+            let savedPaymentMethod = '';
             
             if (wasEditing) {
                 // Clear form completely after editing
                 clearForm();
             } else {
-                // Keep form values but clear amount and description for easy re-entry
+                // Keep form values including payment method but clear amount and description for easy re-entry
+                savedPaymentMethod = document.getElementById('payment-method').value;
                 document.getElementById('amount').value = '';
                 document.getElementById('description').value = '';
                 document.getElementById('notes').value = '';
@@ -363,6 +379,11 @@ async function handleExpenseSubmit(e) {
             await loadExpenseNames();
             await loadPaymentMethods();
             await loadExpenses();
+            
+            // Restore payment method selection for new expenses only
+            if (!wasEditing && savedPaymentMethod) {
+                document.getElementById('payment-method').value = savedPaymentMethod;
+            }
             
             // Update recent expenses list on the split screen
             await loadRecentExpenses();
@@ -425,10 +446,16 @@ async function applyCCFilters() {
 // Display expenses list
 function displayExpenses() {
     const container = document.getElementById('expenses-list');
+    const totalContainer = document.getElementById('expenses-total');
     container.innerHTML = '';
+    
+    // Calculate and display total
+    const total = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+    totalContainer.innerHTML = `<div class="expenses-total-amount"><strong>Total: $${total.toFixed(2)}</strong></div>`;
     
     if (expenses.length === 0) {
         container.innerHTML = '<p>No expenses found.</p>';
+        totalContainer.innerHTML = '<div class="expenses-total-amount"><strong>Total: $0.00</strong></div>';
         return;
     }
     
@@ -437,7 +464,7 @@ function displayExpenses() {
         item.className = 'expense-item';
         item.innerHTML = `
             <div class="expense-details">
-                <div class="expense-date">${new Date(expense.date).toLocaleDateString()}</div>
+                <div class="expense-date">${formatDateDisplay(expense.date)}</div>
                 <div class="expense-type">${expense.expense_type_name}</div>
                 <div class="expense-name">${expense.category_name}</div>
                 <div class="expense-payment-method">${expense.payment_method_name} (${expense.payment_method_type.replace('_', ' ')})</div>
@@ -469,7 +496,7 @@ function displayCCPayments() {
         item.className = 'expense-item';
         item.innerHTML = `
             <div class="expense-details">
-                <div class="expense-date">${new Date(payment.date).toLocaleDateString()}</div>
+                <div class="expense-date">${formatDateDisplay(payment.date)}</div>
                 <div class="expense-type">Credit Card Payment</div>
                 <div class="expense-name">${payment.credit_card_name}</div>
                 <div class="expense-description">Payment Amount</div>
@@ -826,7 +853,7 @@ function displayRecentExpenses(recentExpenses) {
         item.innerHTML = `
             <div class="recent-item-content">
                 <div class="recent-expense-header">
-                    <span class="recent-expense-date">${new Date(expense.date).toLocaleDateString()}</span>
+                    <span class="recent-expense-date">${formatDateDisplay(expense.date)}</span>
                     <span class="recent-expense-amount">$${expense.amount.toFixed(2)}</span>
                 </div>
                 <div class="recent-expense-details">
@@ -893,7 +920,7 @@ function displayRecentCCPayments(recentPayments) {
         item.innerHTML = `
             <div class="recent-item-content">
                 <div class="recent-expense-header">
-                    <span class="recent-expense-date">${new Date(payment.date).toLocaleDateString()}</span>
+                    <span class="recent-expense-date">${formatDateDisplay(payment.date)}</span>
                     <span class="recent-expense-amount">$${payment.payment_amount.toFixed(2)}</span>
                 </div>
                 <div class="recent-expense-details">

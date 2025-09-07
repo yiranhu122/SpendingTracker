@@ -6,6 +6,7 @@
 - **Network mode**: `npm run nas` (for NAS deployment)
 - **Build client**: `npm run build`
 - **Package executables**: `npm run package-win`, `npm run package-linux`, `npm run package-mac`
+- **Update all distributions**: `npm run update-dist` (Windows) or `npm run update-dist-unix` (Linux/macOS)
 - **Docker**: `npm run docker:compose`, `npm run docker:logs`, `npm run docker:stop`
 - **Install all deps**: `npm install-all`
 
@@ -15,7 +16,7 @@
 - **API**: REST endpoints at `/api/*` (expenses, payments, reports, Excel export, database management)
 - **Client-server**: Frontend at `client/`, served statically by Express
 - **Port**: Server runs on 3001, client accesses via localhost:3001 or network IP
-- **Six tabs**: Add Expense, Credit Card Payments, View All, Payment Methods, Reports, Database
+- **Seven tabs**: Add Expense, Credit Card Payments, View Expenses, View Payments, Payment Methods, Reports, Database
 - **Network support**: Dynamic API URLs work for both localhost and network access
 - **Docker ready**: Containerized deployment for NAS systems
 

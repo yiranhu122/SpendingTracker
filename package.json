@@ -27,6 +27,8 @@
     "package-win": "pkg . --targets node18-win-x64 --output dist/spending-tracker-win.exe",
     "package-mac": "pkg . --targets node18-macos-x64 --output dist/spending-tracker-mac",
     "package-linux": "pkg . --targets node18-linux-x64 --output dist/spending-tracker-linux",
+    "update-dist": "update-dist.bat",
+    "update-dist-unix": "./update-dist.sh",
     "nas": "NAS_MODE=true HOST=0.0.0.0 PORT=3001 node server/index.js",
     "nas-win": "set NAS_MODE=true && set HOST=0.0.0.0 && set PORT=3001 && node server/index.js",
     "docker:build": "docker build -t spending-tracker:latest .",

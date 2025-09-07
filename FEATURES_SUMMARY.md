@@ -2,13 +2,14 @@
 
 ## 🏗️ Application Structure
 
-### Six Main Tabs
+### Seven Main Tabs
 1. **Add Expense** - Primary data entry with split-screen feedback
 2. **Credit Card Payments** - Dedicated credit card payment tracking
-3. **View All** - Combined view of all expenses and payments
-4. **Payment Methods** - Centralized payment method management
-5. **Reports** - Monthly and yearly analysis with "Untracked Expenses" calculation
-6. **Database** - Data backup, import, and management operations
+3. **View Expenses** - Dedicated view of all expenses with filtering and total amount display
+4. **View Payments** - Dedicated view of all credit card payments
+5. **Payment Methods** - Centralized payment method management
+6. **Reports** - Monthly and yearly analysis with "Untracked Expenses" calculation
+7. **Database** - Data backup, import, and management operations
 
 ## 💡 Core Concepts
 
@@ -31,7 +32,7 @@ Credit Card Payment: $500
 ### 🎯 Smart Data Entry
 - **Combo Inputs**: Type new Expense Types and Expenses, auto-saved for future use
 - **Controlled Payment Methods**: Only manageable in Payment Methods tab
-- **Form Persistence**: Keeps values after saving for quick similar entries
+- **Form Persistence**: Keeps values including payment method after saving for quick similar entries
 - **Split-Screen Feedback**: See new entries appear immediately on the right
 
 ### 🔄 Monthly Duplication
@@ -117,10 +118,11 @@ Credit Card Payment: $500
 5. **Add New**: Use forms for any new expenses/payments
 
 ### Analysis & Reporting
-1. **View All**: See complete picture of expenses and payments
-2. **Generate Reports**: Monthly summaries with automatic "Untracked Expenses" calculation
-3. **Export to Excel**: Download professional .xlsx files with multiple sheets
-4. **Filter Data**: Use multiple criteria to analyze spending patterns
+1. **View Expenses**: See all expenses with filtering and total amount display
+2. **View Payments**: See all credit card payments separately for easier navigation
+3. **Generate Reports**: Monthly summaries with automatic "Untracked Expenses" calculation
+4. **Export to Excel**: Download professional .xlsx files with multiple sheets
+5. **Filter Data**: Use multiple criteria to analyze spending patterns
 
 ## 🌐 Network & Deployment
 

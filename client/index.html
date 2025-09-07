@@ -13,7 +13,8 @@
             <nav>
                 <button id="add-expense-btn" class="nav-btn active">Add Expense</button>
                 <button id="cc-payments-btn" class="nav-btn">Credit Card Payments</button>
-                <button id="view-all-btn" class="nav-btn">View All</button>
+                <button id="view-expenses-btn" class="nav-btn">View Expenses</button>
+                <button id="view-payments-btn" class="nav-btn">View Payments</button>
                 <button id="payment-methods-btn" class="nav-btn">Payment Methods</button>
                 <button id="reports-btn" class="nav-btn">Reports</button>
                 <button id="database-btn" class="nav-btn">Database</button>
@@ -227,9 +228,8 @@
                 </div>
             </section>
 
-            <!-- View All -->
-            <section id="view-all" class="section">
-                <!-- Expenses Section -->
+            <!-- View Expenses -->
+            <section id="view-expenses" class="section">
                 <div class="view-section">
                     <h2>Expenses</h2>
                     <div class="filters">
@@ -262,10 +262,13 @@
                         </select>
                         <button id="apply-filters">Apply Filters</button>
                     </div>
+                    <div id="expenses-total"></div>
                     <div id="expenses-list"></div>
                 </div>
+            </section>
 
-                <!-- Credit Card Payments Section -->
+            <!-- View Payments -->
+            <section id="view-payments" class="section">
                 <div class="view-section">
                     <h2>Credit Card Payments</h2>
                     <div class="filters">
