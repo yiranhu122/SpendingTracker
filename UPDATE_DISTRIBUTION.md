@@ -38,11 +38,13 @@ The update script automatically updates all distribution files:
 - All server-side Node.js files
 - Database schema and API endpoints
 
-### 3. **Documentation** → `dist/*.md`
+### 3. **Documentation** → `dist/*.md` and `dist/server/*.md`
 - `AGENTS.md` - Development guide
 - `FEATURES_SUMMARY.md` - Feature documentation
 - `README.md` - Main documentation
+- `CHANGELOG.md` - Version history and latest changes
 - All deployment guides (NAS, QNAP, Docker)
+- **Dual locations**: Files copied to both `dist/` (for standalone executables) and `dist/server/` (for container deployments)
 
 ### 4. **Deployment Files** → `dist/`
 - `Dockerfile` - Container configuration

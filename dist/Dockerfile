@@ -23,6 +23,9 @@ RUN if [ -f package-lock.json ]; then \
 COPY server/ ./server/
 COPY client/ ./client/
 
+# Copy documentation files to server directory for documentation viewer
+COPY *.md ./server/
+
 # Create data directory with proper permissions
 RUN mkdir -p /app/data
 

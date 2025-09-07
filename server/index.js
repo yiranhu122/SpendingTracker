@@ -16,6 +16,49 @@ app.use(express.json());
 // Serve static files from client directory
 app.use(express.static(path.join(__dirname, '../client')));
 
+// Serve documentation files
+app.get('/docs/:filename', (req, res) => {
+    const { filename } = req.params;
+    
+    // Validate filename to prevent directory traversal
+    if (!filename.match(/^[a-zA-Z0-9_-]+\.md$/)) {
+        return res.status(400).json({ error: 'Invalid filename format' });
+    }
+    
+    const fs = require('fs');
+    let docPath;
+    
+    // Determine documentation path based on deployment type
+    if (process.pkg) {
+        // Standalone executable - look in same directory as executable
+        docPath = path.join(path.dirname(process.execPath), filename);
+        console.log('Standalone mode: Looking for documentation at:', docPath);
+    } else if (process.env.NAS_MODE || process.env.NODE_ENV === 'production') {
+        // Container/NAS deployment - look in server folder
+        docPath = path.join(__dirname, filename);
+        console.log('Container mode: Looking for documentation at:', docPath);
+    } else {
+        // Development mode - look in parent directory
+        docPath = path.join(__dirname, '..', filename);
+        console.log('Development mode: Looking for documentation at:', docPath);
+    }
+    
+    fs.readFile(docPath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading documentation file:', err);
+            console.error('Attempted path:', docPath);
+            return res.status(404).json({ 
+                error: 'Documentation file not found',
+                path: docPath,
+                deployment: process.pkg ? 'standalone' : (process.env.NAS_MODE ? 'container' : 'development')
+            });
+        }
+        
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(data);
+    });
+});
+
 // Helper function to find or create items in expense_types and categories tables
 async function findOrCreateItem(tableName, itemName) {
   const findQuery = `SELECT id FROM ${tableName} WHERE name = ?`;

@@ -17,6 +17,7 @@ echo ✓ Server files updated
 
 echo.
 echo [3/6] Copying documentation files to dist...
+REM Copy to dist root (for standalone executables)
 copy "AGENTS.md" "dist\AGENTS.md" >nul
 copy "FEATURES_SUMMARY.md" "dist\FEATURES_SUMMARY.md" >nul
 copy "README.md" "dist\README.md" >nul
@@ -25,6 +26,24 @@ copy "NAS_DEPLOYMENT_GUIDE.md" "dist\NAS_DEPLOYMENT_GUIDE.md" >nul
 copy "NAS_QUICK_START.md" "dist\NAS_QUICK_START.md" >nul
 copy "QNAP_CONTAINER_GUIDE.md" "dist\QNAP_CONTAINER_GUIDE.md" >nul
 copy "SOFTWARE_SPECIFICATION.md" "dist\SOFTWARE_SPECIFICATION.md" >nul
+copy "CHANGELOG.md" "dist\CHANGELOG.md" >nul
+copy "UPDATE_DISTRIBUTION.md" "dist\UPDATE_DISTRIBUTION.md" >nul
+copy "DOCUMENTATION_TAB.md" "dist\DOCUMENTATION_TAB.md" >nul
+copy "TIMEZONE_FIX.md" "dist\TIMEZONE_FIX.md" >nul
+
+REM Copy to dist/server (for container deployments)
+copy "AGENTS.md" "dist\server\AGENTS.md" >nul
+copy "FEATURES_SUMMARY.md" "dist\server\FEATURES_SUMMARY.md" >nul
+copy "README.md" "dist\server\README.md" >nul
+copy "DEPLOYMENT_GUIDE.md" "dist\server\DEPLOYMENT_GUIDE.md" >nul
+copy "NAS_DEPLOYMENT_GUIDE.md" "dist\server\NAS_DEPLOYMENT_GUIDE.md" >nul
+copy "NAS_QUICK_START.md" "dist\server\NAS_QUICK_START.md" >nul
+copy "QNAP_CONTAINER_GUIDE.md" "dist\server\QNAP_CONTAINER_GUIDE.md" >nul
+copy "SOFTWARE_SPECIFICATION.md" "dist\server\SOFTWARE_SPECIFICATION.md" >nul
+copy "CHANGELOG.md" "dist\server\CHANGELOG.md" >nul
+copy "UPDATE_DISTRIBUTION.md" "dist\server\UPDATE_DISTRIBUTION.md" >nul
+copy "DOCUMENTATION_TAB.md" "dist\server\DOCUMENTATION_TAB.md" >nul
+copy "TIMEZONE_FIX.md" "dist\server\TIMEZONE_FIX.md" >nul
 echo ✓ Documentation files updated
 
 echo.

@@ -16,7 +16,7 @@
 - **API**: REST endpoints at `/api/*` (expenses, payments, reports, Excel export, database management)
 - **Client-server**: Frontend at `client/`, served statically by Express
 - **Port**: Server runs on 3001, client accesses via localhost:3001 or network IP
-- **Seven tabs**: Add Expense, Credit Card Payments, View Expenses, View Payments, Payment Methods, Reports, Database
+- **Eight tabs**: Add Expense, Credit Card Payments, View Expenses, View Payments, Payment Methods, Reports, Database, Documentation
 - **Network support**: Dynamic API URLs work for both localhost and network access
 - **Docker ready**: Containerized deployment for NAS systems
 

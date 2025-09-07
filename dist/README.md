@@ -95,7 +95,8 @@ See `UPDATE_DISTRIBUTION.md` for detailed instructions.
 6. **Payment Methods**: Manage your payment methods (credit cards and bank accounts)
 7. **Reports**: Generate monthly/yearly summaries with "Untracked Expenses" calculation
 8. **Database**: Backup, import, and manage your data safely
-9. **Excel Export**: Download reports in .xlsx format for advanced analysis
+9. **Documentation**: Access all user guides and technical documentation directly within the app
+10. **Excel Export**: Download reports in .xlsx format for advanced analysis
 
 ## Database Schema
 

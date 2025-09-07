@@ -28,6 +28,7 @@ check_success "Server files updated"
 
 echo
 echo "[3/6] Copying documentation files to dist..."
+# Copy to dist root (for standalone executables)
 cp AGENTS.md dist/AGENTS.md
 cp FEATURES_SUMMARY.md dist/FEATURES_SUMMARY.md
 cp README.md dist/README.md
@@ -36,6 +37,24 @@ cp NAS_DEPLOYMENT_GUIDE.md dist/NAS_DEPLOYMENT_GUIDE.md 2>/dev/null || true
 cp NAS_QUICK_START.md dist/NAS_QUICK_START.md 2>/dev/null || true
 cp QNAP_CONTAINER_GUIDE.md dist/QNAP_CONTAINER_GUIDE.md 2>/dev/null || true
 cp SOFTWARE_SPECIFICATION.md dist/SOFTWARE_SPECIFICATION.md 2>/dev/null || true
+cp CHANGELOG.md dist/CHANGELOG.md 2>/dev/null || true
+cp UPDATE_DISTRIBUTION.md dist/UPDATE_DISTRIBUTION.md 2>/dev/null || true
+cp DOCUMENTATION_TAB.md dist/DOCUMENTATION_TAB.md 2>/dev/null || true
+cp TIMEZONE_FIX.md dist/TIMEZONE_FIX.md 2>/dev/null || true
+
+# Copy to dist/server (for container deployments)
+cp AGENTS.md dist/server/AGENTS.md 2>/dev/null || true
+cp FEATURES_SUMMARY.md dist/server/FEATURES_SUMMARY.md 2>/dev/null || true
+cp README.md dist/server/README.md 2>/dev/null || true
+cp DEPLOYMENT_GUIDE.md dist/server/DEPLOYMENT_GUIDE.md 2>/dev/null || true
+cp NAS_DEPLOYMENT_GUIDE.md dist/server/NAS_DEPLOYMENT_GUIDE.md 2>/dev/null || true
+cp NAS_QUICK_START.md dist/server/NAS_QUICK_START.md 2>/dev/null || true
+cp QNAP_CONTAINER_GUIDE.md dist/server/QNAP_CONTAINER_GUIDE.md 2>/dev/null || true
+cp SOFTWARE_SPECIFICATION.md dist/server/SOFTWARE_SPECIFICATION.md 2>/dev/null || true
+cp CHANGELOG.md dist/server/CHANGELOG.md 2>/dev/null || true
+cp UPDATE_DISTRIBUTION.md dist/server/UPDATE_DISTRIBUTION.md 2>/dev/null || true
+cp DOCUMENTATION_TAB.md dist/server/DOCUMENTATION_TAB.md 2>/dev/null || true
+cp TIMEZONE_FIX.md dist/server/TIMEZONE_FIX.md 2>/dev/null || true
 check_success "Documentation files updated"
 
 echo

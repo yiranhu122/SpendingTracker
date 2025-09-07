@@ -113,7 +113,7 @@ SpendingTracker/
 ## 5. User Interface
 
 ### Navigation
-Seven main tabs with visual feedback for active section:
+Eight main tabs with visual feedback for active section:
 - **Add Expense** - Primary data entry for individual expenses with smart form persistence
 - **Credit Card Payments** - Dedicated entry for credit card payments  
 - **View Expenses** - Dedicated expense view with filtering and total amount display
@@ -121,6 +121,7 @@ Seven main tabs with visual feedback for active section:
 - **Payment Methods** - Management of payment methods (create/edit/delete)
 - **Reports** - Monthly and yearly spending analysis
 - **Database** - Data backup, import, and management operations
+- **Documentation** - Built-in documentation viewer with markdown rendering
 
 ### Add Expense Tab (Split Screen)
 **Left Side: Entry Form**
@@ -184,6 +185,14 @@ Seven main tabs with visual feedback for active section:
 - **Clear**: Complete database reset with double confirmation safeguards
 - **File Validation**: Ensures uploaded files are valid SQLite databases
 - **Smart Import**: Properly maps expense types, categories, and payment methods
+
+### Documentation Tab
+- **Document Selector**: Dropdown menu with all available documentation files
+- **Built-in Viewer**: Markdown files converted to HTML for easy reading
+- **Real-time Loading**: Documentation loads dynamically from server
+- **Comprehensive Coverage**: Features Summary, Getting Started, Technical Specs, Deployment Guide, Changelog
+- **Developer Resources**: Development guide, distribution updates, timezone fix details
+- **Graceful Fallback**: Clear error messages if documentation unavailable
 
 ## 6. Key Features
 

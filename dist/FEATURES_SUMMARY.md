@@ -2,7 +2,7 @@
 
 ## 🏗️ Application Structure
 
-### Seven Main Tabs
+### Eight Main Tabs
 1. **Add Expense** - Primary data entry with split-screen feedback
 2. **Credit Card Payments** - Dedicated credit card payment tracking
 3. **View Expenses** - Dedicated view of all expenses with filtering and total amount display
@@ -10,6 +10,7 @@
 5. **Payment Methods** - Centralized payment method management
 6. **Reports** - Monthly and yearly analysis with "Untracked Expenses" calculation
 7. **Database** - Data backup, import, and management operations
+8. **Documentation** - Built-in documentation viewer with all user guides and technical specifications
 
 ## 💡 Core Concepts
 

@@ -18,6 +18,7 @@
                 <button id="payment-methods-btn" class="nav-btn">Payment Methods</button>
                 <button id="reports-btn" class="nav-btn">Reports</button>
                 <button id="database-btn" class="nav-btn">Database</button>
+                <button id="documentation-btn" class="nav-btn">Documentation</button>
                 <button id="exit-btn" class="nav-btn exit-btn">Exit</button>
             </nav>
         </header>
@@ -398,6 +399,34 @@
                         <button id="clear-db-btn" class="danger-btn">Clear All Data</button>
                     </div>
                     <div id="clear-status"></div>
+                </div>
+            </section>
+
+            <!-- Documentation -->
+            <section id="documentation" class="section">
+                <div class="view-section">
+                    <h2>Documentation</h2>
+                    
+                    <!-- Document Selector -->
+                    <div class="doc-controls">
+                        <select id="doc-selector">
+                            <option value="FEATURES_SUMMARY.md">📋 Features Summary</option>
+                            <option value="README.md">📖 Getting Started</option>
+                            <option value="CHANGELOG.md">📝 What's New</option>
+                            <option value="SOFTWARE_SPECIFICATION.md">🔧 Technical Specifications</option>
+                            <option value="DEPLOYMENT_GUIDE.md">🚀 Deployment Guide</option>
+                            <option value="UPDATE_DISTRIBUTION.md">📦 Distribution Updates</option>
+                            <option value="DOCUMENTATION_TAB.md">📚 Documentation Tab Guide</option>
+                            <option value="TIMEZONE_FIX.md">🕒 Timezone Fix Details</option>
+                            <option value="AGENTS.md">👨‍💻 Development Guide</option>
+                        </select>
+                        <button id="refresh-doc-btn">Refresh</button>
+                    </div>
+                    
+                    <!-- Document Content -->
+                    <div id="doc-content">
+                        <p>Loading documentation...</p>
+                    </div>
                 </div>
             </section>
         </main>

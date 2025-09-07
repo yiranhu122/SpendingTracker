@@ -62,6 +62,7 @@ function setupEventListeners() {
     document.getElementById('payment-methods-btn').addEventListener('click', () => showSection('payment-methods'));
     document.getElementById('reports-btn').addEventListener('click', () => showSection('reports'));
     document.getElementById('database-btn').addEventListener('click', () => showSection('database'));
+    document.getElementById('documentation-btn').addEventListener('click', () => showSection('documentation'));
     document.getElementById('exit-btn').addEventListener('click', handleExit);
     
     // Forms
@@ -89,6 +90,8 @@ function setupEventListeners() {
     document.getElementById('import-file').addEventListener('change', handleFileSelect);
     document.getElementById('import-db-btn').addEventListener('click', importDatabase);
     document.getElementById('clear-db-btn').addEventListener('click', clearDatabase);
+    document.getElementById('doc-selector').addEventListener('change', loadDocumentation);
+    document.getElementById('refresh-doc-btn').addEventListener('click', loadDocumentation);
 }
 
 // Navigation
@@ -113,6 +116,8 @@ function showSection(sectionId) {
         loadRecentCCPayments();
     } else if (sectionId === 'payment-methods') {
         displayPaymentMethods();
+    } else if (sectionId === 'documentation') {
+        loadDocumentation();
     }
 }
 
@@ -1465,4 +1470,118 @@ async function clearDatabase() {
         clearBtn.disabled = false;
         clearBtn.textContent = 'Clear All Data';
     }
+}
+
+// Documentation Functions
+async function loadDocumentation() {
+    const docSelector = document.getElementById('doc-selector');
+    const docContent = document.getElementById('doc-content');
+    const selectedDoc = docSelector.value;
+    
+    if (!selectedDoc) {
+        docContent.innerHTML = '<p>Please select a document to view.</p>';
+        return;
+    }
+    
+    try {
+        docContent.innerHTML = '<p>Loading documentation...</p>';
+        
+        // Fetch the documentation file
+        const response = await fetch(`/docs/${selectedDoc}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load ${selectedDoc}: ${response.status} ${response.statusText}`);
+        }
+        
+        const markdownContent = await response.text();
+        
+        // Convert markdown to HTML (basic conversion)
+        const htmlContent = convertMarkdownToHtml(markdownContent);
+        
+        docContent.innerHTML = htmlContent;
+        
+    } catch (error) {
+        console.error('Error loading documentation:', error);
+        
+        // Try to parse error response for more details
+        let errorDetails = error.message;
+        let deploymentInfo = '';
+        
+        if (error.message.includes('404')) {
+            errorDetails = 'Documentation file not found';
+            deploymentInfo = `
+                <div style="margin: 15px 0; font-size: 14px;">
+                    <strong>Troubleshooting:</strong><br>
+                    • <strong>Standalone executable</strong>: Documentation should be in the same folder as the .exe file<br>
+                    • <strong>Container deployment</strong>: Documentation is included in the container image<br>
+                    • <strong>Development mode</strong>: Documentation files should be in the project root
+                </div>
+            `;
+        }
+        
+        docContent.innerHTML = `
+            <div style="color: #e74c3c; padding: 20px; text-align: center;">
+                <h3>⚠️ Unable to Load Documentation</h3>
+                <p>Could not load <strong>${selectedDoc}</strong></p>
+                <p><em>${errorDetails}</em></p>
+                ${deploymentInfo}
+                <p style="margin-top: 20px; font-size: 13px; color: #7f8c8d;">
+                    Documentation files are also available in your installation folder.
+                </p>
+            </div>
+        `;
+    }
+}
+
+// Simple markdown to HTML converter
+function convertMarkdownToHtml(markdown) {
+    let html = markdown;
+    
+    // Headers
+    html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+    
+    // Bold and italic
+    html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Code blocks
+    html = html.replace(/```[\s\S]*?```/g, function(match) {
+        const code = match.slice(3, -3).trim();
+        return `<pre><code>${escapeHtml(code)}</code></pre>`;
+    });
+    
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    
+    // Lists
+    html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    
+    // Line breaks
+    html = html.replace(/\n\n/g, '</p><p>');
+    html = '<p>' + html + '</p>';
+    
+    // Clean up empty paragraphs
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<pre>)/g, '$1');
+    html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+    
+    return html;
+}
+
+// Escape HTML characters
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

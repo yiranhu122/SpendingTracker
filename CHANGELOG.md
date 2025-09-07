@@ -1,10 +1,18 @@
 # SpendingTracker - Changelog
 
-## Version 1.1.0 - Latest Improvements
+## Version 1.2.0 - Latest Improvements
 
 ### 🎉 Major Enhancements
 
-#### Enhanced Navigation (6→7 Tabs)
+#### Built-in Documentation Viewer
+- **New Documentation tab** provides access to all user guides and technical specifications
+- **Markdown rendering** converts documentation files to readable HTML format
+- **Document selector** with emoji icons for easy navigation
+- **Real-time loading** from server with graceful error handling
+- **Comprehensive coverage** including Features Summary, Getting Started, Technical Specs, and more
+- **Developer resources** accessible within the application
+
+#### Enhanced Navigation (6→8 Tabs)
 - **Split View All tab** into dedicated "View Expenses" and "View Payments" tabs
 - **Eliminates scrolling** between expenses and credit card payments
 - **Focused viewing experience** with dedicated filtering for each data type
