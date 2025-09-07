@@ -30,6 +30,9 @@ When you run the executable, it creates:
 ### Features Included
 - ✅ Complete expense tracking with three-level hierarchy (Type → Expense → Payment Method)
 - ✅ Credit card payment tracking with automatic "Untracked Expenses" calculation
+- ✅ **Separate View Expenses and View Payments tabs** with total amount displays
+- ✅ **Smart form persistence** - payment method stays selected for quick similar entries
+- ✅ **Timezone-accurate date display** - dates show exactly as entered
 - ✅ Duplicate from previous month for both expenses and payments
 - ✅ Payment Methods management (dedicated tab for creating/editing payment methods)
 - ✅ Monthly/yearly reports with "Untracked Expenses" calculation
@@ -40,6 +43,7 @@ When you run the executable, it creates:
 - ✅ Database management with backup/import/clear functionality  
 - ✅ Toast notifications with auto-dismiss (no clicking "OK")
 - ✅ Network access support for multi-device use
+- ✅ **Automated distribution updates** with one-click deployment preparation
 
 ### Option 2: Docker Container (QNAP NAS)
 
@@ -163,6 +167,34 @@ spending-tracker.exe
 ```
 
 **Database Location**: Place `spending.db` in same folder as executable
+
+## Development & Updates
+
+### Updating Distribution Files
+When making changes to the source code, use the automated update scripts:
+
+**Windows:**
+```bash
+npm run update-dist
+```
+
+**Linux/macOS:**
+```bash
+npm run update-dist-unix
+```
+
+This automatically:
+- Updates all client and server files
+- Rebuilds executables for all platforms
+- Updates Docker deployment files
+- Copies documentation
+
+### Recent Improvements
+- **Enhanced Navigation**: Split from 6 to 7 tabs for better organization
+- **Smart Form Persistence**: Payment method stays selected for quick similar entries
+- **Total Amount Displays**: Real-time totals in both View Expenses and View Payments
+- **Timezone Fix**: Dates now display exactly as entered
+- **Separate Views**: No more scrolling through combined expense/payment lists
 
 ## Security Notes
 

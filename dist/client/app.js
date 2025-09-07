@@ -484,10 +484,16 @@ function displayExpenses() {
 // Display credit card payments list
 function displayCCPayments() {
     const container = document.getElementById('cc-payments-list');
+    const totalContainer = document.getElementById('cc-payments-total');
     container.innerHTML = '';
+    
+    // Calculate and display total
+    const total = creditCardPayments.reduce((sum, payment) => sum + parseFloat(payment.payment_amount), 0);
+    totalContainer.innerHTML = `<div class="expenses-total-amount"><strong>Total: $${total.toFixed(2)}</strong></div>`;
     
     if (creditCardPayments.length === 0) {
         container.innerHTML = '<p>No credit card payments found.</p>';
+        totalContainer.innerHTML = '<div class="expenses-total-amount"><strong>Total: $0.00</strong></div>';
         return;
     }
     

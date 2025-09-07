@@ -11,10 +11,14 @@ A full-stack web application for tracking personal expenses and generating spend
 - **Database management** with backup, import, and clear functionality
 - **Split-screen interface** for immediate feedback during data entry
 - **Edit/delete functionality** with visual indicators and safety checks
-- **Advanced filtering** by multiple criteria
+- **Advanced filtering** by multiple criteria with **total amount displays**
+- **Separate expense and payment views** for easier navigation (no more scrolling!)
+- **Smart form persistence** - payment method stays selected for quick similar entries
 - **Monthly/yearly reports** with intelligent "Untracked Expenses" calculation
 - **Excel export functionality** for professional report analysis
 - **Combo input fields** for dynamic creation of expense types and names
+- **Timezone-accurate date display** - dates show exactly as entered
+- **Automated distribution updates** with one-click deployment preparation
 
 ## Tech Stack
 
@@ -53,6 +57,29 @@ npx http-server
 npm run dev
 ```
 
+## Development & Distribution
+
+### Quick Distribution Update
+After making changes to the application, update all distribution files:
+
+**Windows:**
+```bash
+npm run update-dist
+```
+
+**Linux/macOS:**
+```bash
+npm run update-dist-unix
+```
+
+This automatically:
+- Updates all client and server files in `dist/` folder
+- Rebuilds Windows, Linux, and macOS executables
+- Updates Docker deployment files
+- Copies all documentation
+
+See `UPDATE_DISTRIBUTION.md` for detailed instructions.
+
 ## Usage
 
 ### First-Time Setup
@@ -60,14 +87,15 @@ npm run dev
 2. **Add first month's data**: Enter expenses and credit card payments manually
 
 ### Daily Usage  
-1. **Add Expense**: Split-screen interface with immediate feedback and auto-refresh
-2. **Credit Card Payments**: Track actual payments to credit cards with notifications
-3. **Duplicate Previous Month**: One-click duplication of recurring expenses/payments
-4. **View All**: See complete overview of expenses and payments with auto-refresh
-5. **Payment Methods**: Manage your payment methods (credit cards and bank accounts)
-6. **Database**: Backup, import, and manage your data safely
+1. **Add Expense**: Split-screen interface with smart form persistence and immediate feedback
+2. **Credit Card Payments**: Track actual payments to credit cards with notifications  
+3. **View Expenses**: Dedicated expense view with filtering and total amount display
+4. **View Payments**: Dedicated payment view with filtering and total amount display
+5. **Duplicate Previous Month**: One-click duplication of recurring expenses/payments
+6. **Payment Methods**: Manage your payment methods (credit cards and bank accounts)
 7. **Reports**: Generate monthly/yearly summaries with "Untracked Expenses" calculation
-8. **Excel Export**: Download reports in .xlsx format for advanced analysis
+8. **Database**: Backup, import, and manage your data safely
+9. **Excel Export**: Download reports in .xlsx format for advanced analysis
 
 ## Database Schema
 

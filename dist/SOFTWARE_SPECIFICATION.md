@@ -113,10 +113,11 @@ SpendingTracker/
 ## 5. User Interface
 
 ### Navigation
-Six main tabs with visual feedback for active section:
-- **Add Expense** - Primary data entry for individual expenses
+Seven main tabs with visual feedback for active section:
+- **Add Expense** - Primary data entry for individual expenses with smart form persistence
 - **Credit Card Payments** - Dedicated entry for credit card payments  
-- **View All** - Combined view of expenses and payments
+- **View Expenses** - Dedicated expense view with filtering and total amount display
+- **View Payments** - Dedicated credit card payment view with filtering and total amount display
 - **Payment Methods** - Management of payment methods (create/edit/delete)
 - **Reports** - Monthly and yearly spending analysis
 - **Database** - Data backup, import, and management operations
@@ -130,6 +131,7 @@ Six main tabs with visual feedback for active section:
 - Description: Optional text field
 - Amount: Numeric input (required)
 - Notes: Optional textarea
+- **Smart Form Persistence**: Payment method and other fields remain selected after adding expense for quick similar entries
 - Duplicate from Previous Month: Green section with year/month selectors
 
 **Right Side: Recent Expenses**
@@ -158,14 +160,17 @@ Six main tabs with visual feedback for active section:
 - Usage validation: Cannot delete payment methods used in expenses
 - Visual edit mode with cancel functionality
 
-### View All Tab
-**Expenses Section**
+### View Expenses Tab
 - Comprehensive filtering (year, month, expense type, expense name, payment method)
+- **Total amount display** below filters showing sum of all visible expenses
 - Full expense list with edit/delete capabilities
+- Timezone-accurate date display
 
-**Credit Card Payments Section**
-- Independent filtering for credit card payments
-- Separate list below expenses
+### View Payments Tab
+- Independent filtering for credit card payments (year, month, credit card)
+- **Total amount display** below filters showing sum of all visible payments
+- Dedicated credit card payment list with edit/delete capabilities
+- Timezone-accurate date display
 
 ### Reports Tab
 - Year/month selectors for report generation
@@ -185,7 +190,8 @@ Six main tabs with visual feedback for active section:
 ### Dynamic Data Creation
 - **Auto-expanding dropdowns**: Type new values in Expense Type and Expense combo fields to add them permanently
 - **Controlled payment methods**: Payment methods can only be created/modified in dedicated Payment Methods tab
-- **Intelligent defaults**: Forms remember values for quick re-entry of similar items
+- **Smart form persistence**: Payment method and other form values stay selected after adding expense for quick similar entries
+- **Timezone-accurate dates**: Date display matches exactly what was entered (no timezone conversion issues)
 
 ### Edit/Delete Functionality
 - **In-place editing**: Click any item to load it into the entry form
@@ -203,6 +209,12 @@ Six main tabs with visual feedback for active section:
 **Calculation**: `Untracked Expenses = Credit Card Payment - Sum of Individual Expenses`
 **Implementation**: Automatically calculated in both monthly and yearly reports
 **Display**: Shows as separate expense type "Untracked Expenses"
+
+### Enhanced Viewing & Analysis
+- **Separate expense and payment views**: No more scrolling through combined lists
+- **Real-time total calculations**: Total amounts displayed below filters, updates dynamically with filter changes
+- **Comprehensive filtering**: Multiple filter criteria with immediate visual feedback
+- **Smart navigation**: Seven focused tabs instead of combined views for better usability
 
 ### User Experience Enhancements
 - **Toast Notifications**: Auto-dismissing success/error messages (no clicking "OK")
